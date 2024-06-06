@@ -8,6 +8,7 @@ class Company(ap.Agent):
         #todo: company choses best positions to be in
         self.__position = np.random.rand(1, 2) * 100
         self.__cash = self.p.companies_cash[self.id - self.p.n_consumer_agents - 1]
+        self.__prices = self.p.initial_prices[self.id - self.p.n_consumer_agents - 1]
 
     def position(self):
         return self.__position

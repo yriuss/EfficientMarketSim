@@ -17,6 +17,7 @@ def main():
     # companies cash is defined as a noise around a predefined number
     std_dev = 1.0
     companies_cash = np.random.normal(INITIAL_PRICE, std_dev, N_COMPANIES)
+    initial_prices = np.random.normal(INITIAL_PRICE, std_dev, N_COMPANIES)
 
     
 
@@ -25,6 +26,7 @@ def main():
         'n_company_agents':N_COMPANIES,
         'consumer_positions': np.random.rand(N_CONSUMERS, 2) * 100,
         'companies_cash': companies_cash,
+        'initial_prices': initial_prices,
         'epsilon': 0.5,
         'steps':10
     }
