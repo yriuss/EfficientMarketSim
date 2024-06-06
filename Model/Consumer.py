@@ -19,6 +19,7 @@ class Consumer(ap.Agent):
             self.leave_market()
 
     def leave_market(self):
+        #todo: if consumer has negative utility he leaves the market
         pass
     
     def pref_company_id(self):

@@ -13,5 +13,6 @@ class Company(ap.Agent):
         return self.__position
 
     def evaluate_change_in_price(self):
+        #todo: company should decide if its prices are going to change
         for i in [-self.__epsilon, 0, self.__epsilon]:
             pass
