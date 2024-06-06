@@ -1,0 +1,7 @@
+Teoria dos jogos:
+
+- O princípio basico em aplicações econômicas de teoria dos jogos é que 2 ou mais agentes racionais tentam maximizar sua função objetivo, enquanto cientes que suas ações tem impacto sobre outros resultados.
+
+- Os agentes, neste caso, baseiam-se nas suas respostas e nas respostas de outros agentes para determinar a melhro ação a ser tomada. 
+
+- Se todos agentes tem a melhro resposta, o chamado equilíbro de Nash é atingido. Este equilíbrio é o conceito central da maioria das aplicações de teoria dos jogos, incluingo o "Hotelling's model".

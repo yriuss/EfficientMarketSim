@@ -1,11 +1,17 @@
 import agentpy as ap
+import numpy as np
 
-class MyAgent(ap.Agent):
+class Company(ap.Agent):
 
     def setup(self):
-        # Initialize an attribute with a parameter
-        self.my_attribute = self.p.my_parameter
+        self.__epsilon = self.p.epsilon
+        #todo: company choses best positions to be in
+        self.__position = np.random.rand(1, 2) * 100
+        self.__cash = self.p.companies_cash[self.id - self.p.n_consumer_agents - 1]
 
-    def agent_method(self):
-        # Define custom actions here
-        pass
+    def position(self):
+        return self.__position
+
+    def evaluate_change_in_price(self):
+        for i in [-self.__epsilon, 0, self.__epsilon]:
+            pass

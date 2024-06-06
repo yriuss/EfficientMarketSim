@@ -1,71 +1,36 @@
-import agentpy as ap
 import matplotlib.pyplot as plt
+import numpy as np
+from Model.Market import Market
 
-class FishingAgent(ap.Agent):
-    def setup(self):
-        self.fish_caught = 0
-        self.role = "Pescador"
-        self.max_fish = 20
 
-    def send_message(self, recipient, performative, content):
-        message = {'performative': performative, 'content': content}
-        recipient.receive_message(message)
+def utility_function(company, consumer):
+    pass
 
-    def receive_message(self, message):
-        if message['performative'] == 'inform' and message['content'] == 'reduce_fishing':
-            self.reaction_to_alert()
 
-    def reaction_to_alert(self):
-        self.max_fish = max(5, self.max_fish - 5)
+def main():
+    np.random.seed(42)
 
-    def decide_fishing(self):
-        if self.model.fish_count > 0 and self.role == "Pescador":
-            fish_to_catch = min(self.max_fish, self.model.fish_count)
-            self.model.fish_count -= fish_to_catch
-            self.fish_caught += fish_to_catch
+    INITIAL_PRICE = 0
+    N_CONSUMERS = 10
+    N_COMPANIES = 10
 
-class FisheryModel(ap.Model):
-    def setup(self):
-        self.fish_count = 1000
-        self.agents = ap.AgentList(self, 10, FishingAgent)
-        self.fish_counts = []
-        self.pesquisador = ap.AgentList(self)  # Cria uma nova lista de agentes para o grupo 1
-        self.pescador = ap.AgentList(self)  # Cria uma nova lista de agentes para o grupo 2
-        self.create_groups()
+    # companies cash is defined as a noise around a predefined number
+    std_dev = 1.0
+    companies_cash = np.random.normal(INITIAL_PRICE, std_dev, N_COMPANIES)
 
-    def create_groups(self):
-        # Divide os agentes em dois grupos baseados em índice par ou ímpar
-        for i, agent in enumerate(self.agents):
-            if i % 2 == 0:
-                self.pesquisador.append(agent)
-            else:
-                self.pescador.append(agent)
+    
 
-    def update(self):
-        self.fish_count += int(self.fish_count * 0.05)
-        if self.fish_count > 1000:
-            self.fish_count = 1000
-        self.fish_counts.append(self.fish_count)
+    parameters = {
+        'n_consumer_agents':N_CONSUMERS,
+        'n_company_agents':N_COMPANIES,
+        'consumer_positions': np.random.rand(N_CONSUMERS, 2) * 100,
+        'companies_cash': companies_cash,
+        'epsilon': 0.5,
+        'steps':10
+    }
 
-    def step(self):
-        self.agents.decide_fishing()
+    model = Market(parameters)
+    results = model.run()
 
-        if self.fish_count < 300:
-            for agent in self.pesquisador:
-                for other in self.pescador:
-                    agent.send_message(other, 'inform', 'reduce_fishing')
-
-    def end(self):
-        total_fish_caught = sum(agent.fish_caught for agent in self.agents)
-        print(f"Total de peixes pescados: {total_fish_caught}")
-        print(f"Peixes restantes no lago: {self.fish_count}")
-
-parameters = {'steps': 100}
-model = FisheryModel(parameters)
-model.run()
-
-plt.plot(model.fish_counts)
-plt.title('Quantidade de Peixes no Lago ao Longo do Tempo')
-plt.xlabel('Passo')
-plt.ylabel('Quantidade de Peixes')
-plt.show()
+if __name__ == "__main__":
+    main()
