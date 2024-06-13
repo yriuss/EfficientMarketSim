@@ -5,17 +5,15 @@ from Model.Company import Company
 import numpy as np
 
 class Market(ap.Model):
-    
 
     def setup(self):
-        """ Initiate a list of new agents. """
+        """ Inicializa uma lista de novos agentes. """
         self.consumers = ap.AgentList(self, self.p.n_consumer_agents, Consumer, positions=self.p.consumer_positions)
         self.companies = ap.AgentList(self, self.p.n_company_agents, Company)
 
         self.show_env()
-    
+
     def show_env(self):
-        #todo: dynamical plot and set each profit to its respective company
         plt.figure(figsize=(10, 8))
         companies_positions = np.empty((0, 2))
         for company in self.companies:
@@ -27,26 +25,42 @@ class Market(ap.Model):
                      bbox=dict(facecolor=cor, alpha=0.3, boxstyle='round,pad=0.3'))
 
         plt.scatter(companies_positions[:, 0], companies_positions[:, 1], color='red', marker='*', s=200, label='Empresas')
-
-        plt.scatter(self.p.consumer_positions[:,0], self.p.consumer_positions[:,1], color='blue', marker='o', s=100, label='Consumidores')
+        plt.scatter(self.p.consumer_positions[:, 0], self.p.consumer_positions[:, 1], color='blue', marker='o', s=100, label='Consumidores')
 
         plt.title('Initial Market Space')
         plt.xlabel('X Coordinates')
         plt.ylabel('Y Coordinates')
         plt.legend()
         plt.grid(True)
-
         plt.show()
 
-
     def step(self):
-        """ Call a method for every agent. """
-        #self.agents.agent_method()
+        for company in self.companies:
+            company.evaluate_change_in_price()
+        
+        for consumer in self.consumers:
+            utility_values = np.array([utility_function(company, consumer, consumer.information_level) for company in self.companies])
+            consumer.agent_method(utility_values)
 
     def update(self):
-        """ Record a dynamic variable. """
-        #self.agents.record('my_attribute')
-
+        """ Atualiza variáveis dinâmicas. """
+        for company in self.companies:
+            company.record('cash', company.cash())
+            company.record('price', company.price())
+        
     def end(self):
-        """ Repord an evaluation measure. """
+        """ Registra uma medida de avaliação. """
         self.report('my_measure', 1)
+    
+    def show_results(self):
+        """ Mostra os resultados da simulação. """
+        plt.figure(figsize=(10, 8))
+        for company in self.companies:
+            plt.plot(company.recorded('cash'), label=f'Empresa {company.id} - Caixa')
+            plt.plot(company.recorded('price'), label=f'Empresa {company.id} - Preço')
+        plt.title('Resultados da Simulação de Mercado')
+        plt.xlabel('Passos')
+        plt.ylabel('Valores')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
