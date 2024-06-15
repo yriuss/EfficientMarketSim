@@ -3,7 +3,7 @@ import numpy as np
 from Model.Market import Market
 
 # função de utilidade para consumidores
-def utility_function(company, consumer, information_level):
+def utility_function(company, consumer, information_level) -> float:
     distance = np.linalg.norm(company.position() - consumer.position())
     perceived_price = company.price()
     
@@ -30,6 +30,7 @@ def main():
         'consumer_positions': np.random.rand(N_CONSUMERS, 2) * 100,
         'companies_cash': companies_cash,
         'initial_prices': initial_prices,
+        'utility_function': utility_function,
         'epsilon': 0.5,
         'steps': 10
     }

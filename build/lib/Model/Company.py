@@ -71,17 +71,9 @@ class Company(ap.Agent):
             try:
                 message = self.message_handler.receive_message(timeout= 1)
                 if message.performative == 'request' and message.content == 'send_price':
-                    #todo: send price offer to coordinator (decode_msg and process msg are called over here)
+                    #todo: send price offer to coordinator
                     price = 100  # Example price
                     response = KQMLMessage('inform', self, message.sender.message_handler.name, f'price:{price}')
                     self.message_handler.send_message(message.sender.message_handler, response)
             except:
                 continue
-    
-    def decode_msg(self):
-        #todo: decode received message
-        pass
-
-    def process_msg(self):
-        #todo: process decoded message
-        pass

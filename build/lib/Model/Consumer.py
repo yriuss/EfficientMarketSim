@@ -43,18 +43,10 @@ class Consumer(ap.Agent):
             try:
                 message = self.message_handler.receive_message(timeout= 1)
                 if message.performative == 'inform' and message.content == 'offers_available':
-                    #todo: decide which company is better (decode_msg and process msg are called over here)
+                    # Simulate receiving offers and accepting one
                     response = KQMLMessage('accept', self, message.sender.message_handler.name, 'buy')
                     self.message_handler.send_message(message.sender.message_handler, response)
             except:
                 continue
-    
-    def decode_msg(self):
-        #todo: decode received message
-        pass
-
-    def process_msg(self):
-        #todo: process decoded message
-        pass
 
     
