@@ -39,22 +39,36 @@ class Consumer(ap.Agent):
 
 
     def run(self):
+        #todo(ALANA): decide which company is better (decode_msg and process msg are called over here)
+
         while self.message_handler.running:
             try:
-                message = self.message_handler.receive_message(timeout= 1)
+                message = self.message_handler.receive_message(timeout=1)
+                print(f'1')
                 if message.performative == 'inform' and message.content == 'offers_available':
-                    #todo: decide which company is better (decode_msg and process msg are called over here)
-                    response = KQMLMessage('accept', self, message.sender.message_handler.name, 'buy')
-                    self.message_handler.send_message(message.sender.message_handler, response)
-            except:
+                    self.decode_msg(message)  # Decodifica a mensagem e responde com 'accept'
+                else:
+                    self.process_msg(message)  # Processa outras mensagens recebidas
+            except Exception as e:
+                print(f"Error handling message: {e}")
                 continue
     
-    def decode_msg(self):
-        #todo: decode received message
-        pass
+    def decode_msg(self, message):
+    #todo(ALANA): decode received message
+        if message.performative == 'inform' and message.content == 'offers_available':
+            # apenas respondendo com 'accept' para a primeira empresa
+            company_id = self.model.coordinator.get_company_for_consumer(self)
+            company = self.model.companies[company_id]
+            response = KQMLMessage('accept', self, company.message_handler.name, 'buy')
+            self.message_handler.send_message(company.message_handler, response)
+        else:
+            print(f"Consumer {self.id} received unknown message: {message}")
 
-    def process_msg(self):
-        #todo: process decoded message
-        pass
+    def process_msg(self, message):
+    #todo(ALANA): process decoded message
+        if message.performative == 'accept' and message.content == 'buy':
+            print(f"Consumer {self.id} received confirmation of purchase from {message.sender.name}")
+        else:
+            print(f"Consumer {self.id} received unknown message in process_msg: {message}")
 
     
