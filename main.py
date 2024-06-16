@@ -11,7 +11,7 @@ def utility_function(company, consumer, information_level) -> float:
         # preços com ruído (informação imperfeita)
         perceived_price += np.random.normal(0, (1 - information_level) * perceived_price)
     
-    return -perceived_price - distance  # utilizada diminui com maior preço e distância
+    return -perceived_price - distance  # utilidade diminui com maior preço e distância
 
 def main():
     np.random.seed(42)
@@ -32,7 +32,8 @@ def main():
         'initial_prices': initial_prices,
         'utility_function': utility_function,
         'epsilon': 0.5,
-        'steps': 10
+        'steps': 10,
+        'verbose': True
     }
 
     model = Market(parameters)
