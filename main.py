@@ -1,17 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from Model.Market import Market
-
-# função de utilidade para consumidores
-def utility_function(company, consumer, information_level) -> float:
-    distance = np.linalg.norm(company.position() - consumer.position())
-    perceived_price = company.price()
-    
-    if information_level < 1.0:
-        # preços com ruído (informação imperfeita)
-        perceived_price += np.random.normal(0, (1 - information_level) * perceived_price)
-    
-    return -perceived_price - distance  # utilidade diminui com maior preço e distância
+from Model.utility import utility_function 
 
 def main():
     np.random.seed(42)

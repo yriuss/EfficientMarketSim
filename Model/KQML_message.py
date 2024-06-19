@@ -1,6 +1,7 @@
 import threading
 import queue
 import time 
+from queue import Empty
 
 VERBOSE = True
 
@@ -32,15 +33,18 @@ class MessageHandler:
         if(self.verbose):
             print(f'{self.name} sending message to {receiver_handler.name}: {message.to_string()}')
         receiver_handler.inbox.put(message)
+        print(f'Message sent to {receiver_handler.name} with content: {message}')
+
 
     def receive_message(self, timeout):
-        message = self.inbox.get(timeout=timeout)
-        if(self.verbose):
-            print(f'{self.name} received message: {message.to_string()}')
-        return message
+        try:
+            message = self.inbox.get(timeout=timeout)
+            if(self.verbose):
+                print(f'{self.name} received message: {message.to_string()}')
+            return message
+        except Empty:
+            return None
         
-        
-
     def process_message(self, message):
         raise NotImplementedError("This method should be implemented by subclasses")
 
@@ -52,6 +56,5 @@ class MessageHandler:
             except queue.Empty:
                 continue
             
-
     def stop(self):
         self.running = False

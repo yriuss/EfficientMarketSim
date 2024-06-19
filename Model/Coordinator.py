@@ -17,35 +17,43 @@ class Coordinator(ap.Agent):
 
     def register_company(self, company):
         self.__companies.append(company)
+        print(f'Company {company.id} registered.')
 
     def register_consumer(self, consumer):
         self.__consumers.append(consumer)
-    
+        print(f'Consumer {consumer.id} registered.')
+
     def start_process(self):
         # Start threads for companies
         for company in self.__companies:
             thread = threading.Thread(target=company.run)
             thread.start()
+            print(f'Company {company.id} thread started.')
 
         # Start threads for consumers
         for consumer in self.__consumers:
             thread = threading.Thread(target=consumer.run)
             thread.start()
+            print(f'Consumer {consumer.id} thread started.')
 
     def send_msgs2group(self, performative, group, msg_content):
         self.received_counter = len(group)
-        for company in group:
-            msg = KQMLMessage(performative, self, company.message_handler.name, msg_content)
-            self.message_handler.send_message(company.message_handler, msg)
+        for recipient in group:
+            msg = KQMLMessage(performative, self, recipient.message_handler.name, msg_content)
+            print(f'{msg}')
+            self.message_handler.send_message(recipient.message_handler, msg)
+            print(f'Sent {performative} message to {recipient.__class__.__name__} {recipient.id} with content: {msg_content}')
 
         while self.received_counter > 0:
-            self.run()
+            time.sleep(1)  # Aguarda um segundo para evitar alta utilização de CPU
 
     def process(self):
+        print("Coordinator processing messages")
         #todo: essas mensagens são bem genéricas, os valores aqui precisam ser decodificados
         self.send_msgs2group('request', self.__companies, 'send_price')
         self.send_msgs2group('inform', self.__consumers, 'offers_available')
         #todo: falta uma última etapa de mensagens do Coordenador para as empresas
+        print("Messages sent to all companies and consumers")
 
     
     def end(self):
@@ -57,16 +65,26 @@ class Coordinator(ap.Agent):
 
     def run(self):
         while self.message_handler.running:
-            message = self.message_handler.receive_message(timeout= 1)
-            if message.performative == 'request':
-                self.received_counter -=  1
-            elif message.performative == 'accept':
-                self.received_counter -= 1
-            elif message.performative == 'inform':
-                self.received_counter -= 1
-            if(self.received_counter == 0):
-                self.message_handler.running = False
-        self.message_handler.running = True
+            try:
+                message = self.message_handler.receive_message(timeout=1)
+                if message is not None:
+                    if message.performative == 'request':
+                        self.received_counter -=  1
+                    elif message.performative == 'accept':
+                        self.received_counter -= 1
+                    elif message.performative == 'inform':
+                        self.received_counter -= 1
+
+                    if self.received_counter == 0:
+                        self.message_handler.running = False
+                else:
+                    print(f'{self.__name} did not receive any message.')
+                
+            except Exception as e:
+                print(f"Error handling message in {self.__name}: {str(e)}")
+                import traceback
+                print(traceback.format_exc())
+                continue
     
     def decode_messages(self):
         #todo: decode messages

@@ -1,6 +1,8 @@
 import agentpy as ap
 import numpy as np
 import asyncio
+import traceback
+from Model.utility import utility_function
 from Model.KQML_message import MessageHandler, KQMLMessage
 
 
@@ -15,7 +17,6 @@ class Company(ap.Agent):
         self.information_level = np.random.uniform(0.5, 1.0)  # nível de informação da empresa
         self.__name = "Company" + str(self.id)
         self.message_handler = MessageHandler(self.__name, verbose=self.p.verbose)
-
         
         self._inbox = asyncio.Queue()
 
@@ -69,19 +70,36 @@ class Company(ap.Agent):
     def run(self):
         while self.message_handler.running:
             try:
-                message = self.message_handler.receive_message(timeout= 1)
-                if message.performative == 'request' and message.content == 'send_price':
-                    #todo: send price offer to coordinator (decode_msg and process msg are called over here)
-                    price = 100  # Example price
-                    response = KQMLMessage('inform', self, message.sender.message_handler.name, f'price:{price}')
-                    self.message_handler.send_message(message.sender.message_handler, response)
-            except:
-                continue
-    
-    def decode_msg(self):
-        #todo: decode received message
-        pass
+                message = self.message_handler.receive_message(timeout=1)
+                if message:
+                    print(f'Company {self.id} received message: {message.to_string()}')
 
-    def process_msg(self):
-        #todo: process decoded message
-        pass
+                    if message.performative == 'request' and message.content == 'send_price':
+                        self.decode_msg(message)
+                    else:
+                        self.process_msg(message)
+                else:
+                    print(f'Company {self.id} did not receive any message.')
+
+            except Exception as e:
+                print(f"Error handling message in Company {self.id}: {str(e)}")
+                import traceback
+                print(traceback.format_exc())
+                continue
+            
+    def decode_msg(self, message):
+        #todo(ALANA): decode received message
+        if message.performative == 'request' and message.content == 'send_price':
+            price = self.price()  # Utilize o preço da empresa
+            response = KQMLMessage('inform', self, message.sender.message_handler.name, f'price:{price}')
+            print(f'Company {self.id} sending price: {price}')
+            self.message_handler.send_message(message.sender.message_handler, response)
+        else:
+            print(f"Company {self.id} received unknown message: {message}")
+
+    def process_msg(self, message):
+        #todo(ALANA)
+        if message.performative == 'inform' and 'price:' in message.content:
+            print(f"Company {self.id} received price information: {message.content.split(':')[1]}")
+        else:
+            print(f"Company {self.id} received unknown message in process_msg: {message}")

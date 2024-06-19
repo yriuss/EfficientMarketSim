@@ -26,11 +26,13 @@ class Coordinator(ap.Agent):
         for company in self.__companies:
             thread = threading.Thread(target=company.run)
             thread.start()
+            print(f'Company {company.id} thread started.')
 
         # Start threads for consumers
         for consumer in self.__consumers:
             thread = threading.Thread(target=consumer.run)
             thread.start()
+            print(f'Consumer {consumer.id} thread started.')
 
     def send_msgs2group(self, performative, group, msg_content):
         self.received_counter = len(group)
@@ -46,7 +48,10 @@ class Coordinator(ap.Agent):
         self.send_msgs2group('request', self.__companies, 'send_price')
         self.send_msgs2group('inform', self.__consumers, 'offers_available')
         #todo: falta uma última etapa de mensagens do Coordenador para as empresas
-
+        
+        while self.received_counter > 0:
+            self.run()
+            print(f"Messages left to process: {self.received_counter}")
     
     def end(self):
         self.message_handler.stop()
