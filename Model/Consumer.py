@@ -39,22 +39,39 @@ class Consumer(ap.Agent):
 
 
     def run(self):
+        #todo(ALANA): decide which company is better (decode_msg and process msg are called over here)
         while self.message_handler.running:
             try:
-                message = self.message_handler.receive_message(timeout= 1)
+                message = self.message_handler.receive_message(timeout=1)
                 if message.performative == 'inform' and message.content == 'offers_available':
-                    #todo: decide which company is better (decode_msg and process msg are called over here)
-                    response = KQMLMessage('accept', self, message.sender.message_handler.name, 'buy')
-                    self.message_handler.send_message(message.sender.message_handler, response)
-            except:
+                    self.decode_msg(message)
+                    self.process_msg(message)
+            except Exception as e:
+                print(f"Error handling message: {e}")
                 continue
     
-    def decode_msg(self):
-        #todo: decode received message
-        pass
-
-    def process_msg(self):
-        #todo: process decoded message
-        pass
-
+    def decode_msg(self, message):
+    #todo(ALANA): decode received message
+        if message.performative == 'inform' and message.content == 'offers_available':
+            price_str = message.content.split(':')[1]
+            price = float(price_str)
+            self.price = price
+    def process_msg(self, message):
+    #todo(ALANA): process decoded message
+        if message.performative == 'inform' and message.content.startswith('price:'):
+            utility_values = np.array([self.model.utility_function(company, self, self.information_level) for company in self.model.companies])
+            self.agent_method(utility_values)  # Decide qual empresa oferece a maior utilidade esperada
+            best_company_id = self.pref_company_id()
+            if best_company_id is not None:
+                best_company = self.model.companies[best_company_id]
+                if self.price <= best_company.price():  # Compra somente se o preço oferecido for menor ou igual ao preço da empresa preferida
+                    response = KQMLMessage('accept', self, best_company.message_handler.name, 'buy')
+                    self.message_handler.send_message(best_company.message_handler, response)
+                else:
+                    print(f"Consumer {self.id} received a price offer higher than expected from {message.sender.message_handler.name}. Ignoring offer.")
+            else:
+                print(f"Consumer {self.id} could not decide on a company to buy from.")
     
+
+
+ 

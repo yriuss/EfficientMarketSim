@@ -17,7 +17,7 @@ def main():
     np.random.seed(42)
 
     INITIAL_PRICE = 0
-    N_CONSUMERS = 10
+    N_CONSUMERS = 5
     N_COMPANIES = 2  # modelo de Hotelling, geralmente 2 empresas
 
     std_dev = 1.0
@@ -32,7 +32,8 @@ def main():
         'initial_prices': initial_prices,
         'utility_function': utility_function,
         'epsilon': 0.5,
-        'steps': 10
+        'steps': 10,
+        'verbose': True
     }
 
     model = Market(parameters)
