@@ -51,7 +51,22 @@ class Coordinator(ap.Agent):
     def process(self):
         #todo: essas mensagens são bem genéricas, os valores aqui precisam ser decodificados
         self.send_msgs2group('request', self.__companies, 'send_price')
-        self.send_msgs2group('inform', self.__consumers, 'offers:'+str(self.__offers))
+        if(self.__consumers != []):
+            self.send_msgs2group('inform', self.__consumers, 'offers:'+str(self.__offers))
+        for i, company in enumerate(self.__companies):
+            consumers_that_bought = 0
+            for consumer in self.__consumers:
+                if(consumer.bought()):
+                    consumers_that_bought += 1
+            company.sell(consumers_that_bought)
+
+            # se o caixa da empresa atingir 0, ela declara falência
+            if(company.cash() <= 0):
+                del self.__companies[i]
+            else:
+                company.get_prices_info(self.__offers)
+                company.evaluate_change_in_price()
+
         self.__offers = []
         #todo: falta uma última etapa de mensagens do Coordenador para as empresas
 
@@ -85,8 +100,14 @@ class Coordinator(ap.Agent):
         elif message.performative == 'inform':
             self.received_counter -= 1
 
-            if message.sender.name()[:-1] == "Company":
+            if "Company" in message.sender.name():
                 self.__offers.append(float(message.content.split(':')[1]))
+        elif message.performative == 'reject':
+            self.received_counter -= 1
+            for i, consumer in enumerate(self.__consumers):
+                if(consumer.name() == message.sender.name()):
+                    del self.__consumers[i]
+                    break
         if(self.received_counter == 0):
             self.message_handler.running = False
         

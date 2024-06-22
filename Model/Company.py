@@ -63,7 +63,7 @@ class Company(ap.Agent):
         while self.message_handler.running:
             try:
                 message = self.message_handler.receive_message(timeout=1)
-                if message and message.receiver[:-1] == 'Company':
+                if message and 'Company' in message.receiver:
                     print(f'Company {self.id} received message: {message.to_string()}')
 
                     if message.performative == 'request' and message.content == 'send_price':
@@ -74,9 +74,6 @@ class Company(ap.Agent):
                     print(f'Company {self.id} did not receive any message.')
 
             except Exception as e:
-                #print(f"Error handling message in Company {self.id}: {str(e)}")
-                #import traceback
-                #print(traceback.format_exc())
                 continue
             
     def decode_msg(self, message):
@@ -84,7 +81,7 @@ class Company(ap.Agent):
         if message.performative == 'request' and message.content == 'send_price':
             price = self.price()  # Utilize o preço da empresa
             response = KQMLMessage('inform', self, message.sender.message_handler.name, f'price:{price}')
-            print(f'Company {self.id} sending price: {price}')
+            #print(f'Company {self.id} sending price: {price}')
             self.message_handler.send_message(message.sender.message_handler, response)
         else:
             print(f"Company {self.id} received unknown message: {message}")

@@ -46,6 +46,7 @@ class Market(ap.Model):
 
     def step(self):
         self.coordinator.process()
+        
 
     def update(self):
         """ Atualiza variáveis dinâmicas. """

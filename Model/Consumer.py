@@ -15,6 +15,15 @@ class Consumer(ap.Agent):
         self._inbox = asyncio.Queue()
         self.__value = self.model.p.value
         self.__traveling_cost = self.model.p.traveling_cost
+        self.__buy = False
+        self.__pref_company_index = None
+    def bought(self):
+        if(self.__buy):
+            self.__buy = False
+            return True
+        else:
+            return self.__buy
+
     def value(self):
         return self.__value
     def traveling_cost(self):
@@ -68,6 +77,7 @@ class Consumer(ap.Agent):
     #todo(ALANA): process decoded message
         if message.performative == 'inform' and type(message.content) == list:
             utility_values = np.array([self.model.p.consumer_utility_function(company, self, self.information_level) for company in self.model.companies])
+            self.__pref_company_id = None
             self.agent_method(utility_values)  # Decide qual empresa oferece a maior utilidade esperada
             best_company_id = self.pref_company_id()
             if best_company_id is not None:
@@ -75,11 +85,12 @@ class Consumer(ap.Agent):
                 
                 response = KQMLMessage('accept', self, self.model.coordinator.message_handler.name[0], 'buy')
                 self.message_handler.send_message(self.model.coordinator.message_handler, response)
-                    
+                self.__buy = True
             else:
-                response = KQMLMessage('reject', self, best_company.message_handler.name, 'leave')
-                self.message_handler.send_message(best_company.message_handler, response)
+                response = KQMLMessage('reject', self, self.model.coordinator.message_handler.name[0], 'leave')
+                self.message_handler.send_message(self.model.coordinator.message_handler, response)
                 print(f"Consumer {self.id} is leaving the market.")
+                self.__buy = False
     
 
 

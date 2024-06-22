@@ -16,12 +16,12 @@ def main():
     np.random.seed(42)
 
     INITIAL_PRICE = 0
-    N_CONSUMERS = 5
+    N_CONSUMERS = 50
     N_COMPANIES = 2  # modelo de Hotelling, geralmente 2 empresas
 
     std_dev = 1.0
-    companies_cash = np.random.normal(INITIAL_PRICE, std_dev, N_COMPANIES)
-    initial_prices = np.random.normal(INITIAL_PRICE, std_dev, N_COMPANIES)
+    companies_cash = 10000*abs(np.random.normal(INITIAL_PRICE, std_dev, N_COMPANIES))
+    initial_prices = 100*abs(np.random.normal(INITIAL_PRICE, std_dev, N_COMPANIES))
 
     parameters = {
         'n_consumer_agents': N_CONSUMERS,
@@ -32,7 +32,7 @@ def main():
         'consumer_utility_function': consumer_utility_function,
         'operational_cost': 100,
         'epsilon': 0.5,
-        'steps': 10,
+        'steps': 100,
         'verbose': True,
         'value': 10,
         'traveling_cost': 0.1
