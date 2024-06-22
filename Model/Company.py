@@ -38,7 +38,7 @@ class Company(ap.Agent):
 
     def evaluate_change_in_price(self):
         # decisão da empresa sobre os preços
-        if(self.__price >= np.mean(self.__prices)):
+        if(self.__price > np.mean(self.__prices)):
             self.__price -= self.__epsilon
         
     def sell(self, n_sellings):
