@@ -32,9 +32,9 @@ def main():
         'consumer_utility_function': consumer_utility_function,
         'operational_cost': 100,
         'epsilon': 0.5,
-        'steps': 100,
+        'steps': 300,
         'verbose': True,
-        'value': 10,
+        'value': 100,
         'traveling_cost': 0.1
     }
 

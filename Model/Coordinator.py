@@ -50,7 +50,8 @@ class Coordinator(ap.Agent):
 
     def process(self):
         #todo: essas mensagens são bem genéricas, os valores aqui precisam ser decodificados
-        self.send_msgs2group('request', self.__companies, 'send_price')
+        if(self.__companies != []):
+            self.send_msgs2group('request', self.__companies, 'send_price')
         if(self.__consumers != []):
             self.send_msgs2group('inform', self.__consumers, 'offers:'+str(self.__offers))
         for i, company in enumerate(self.__companies):
@@ -62,6 +63,7 @@ class Coordinator(ap.Agent):
 
             # se o caixa da empresa atingir 0, ela declara falência
             if(company.cash() <= 0):
+                company.message_handler.stop()
                 del self.__companies[i]
             else:
                 company.get_prices_info(self.__offers)
@@ -106,6 +108,7 @@ class Coordinator(ap.Agent):
             self.received_counter -= 1
             for i, consumer in enumerate(self.__consumers):
                 if(consumer.name() == message.sender.name()):
+                    consumer.message_handler.stop()
                     del self.__consumers[i]
                     break
         if(self.received_counter == 0):

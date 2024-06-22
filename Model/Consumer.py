@@ -68,25 +68,34 @@ class Consumer(ap.Agent):
     #todo(ALANA): decode received message
         if message.performative == 'inform' and message.content.startswith('offers'):
             string_elements = message.content.strip(('offers:[]')).split(',')
-
-            message.content = [float(element) for element in string_elements]
+            if(string_elements[0] != ''):
+                message.content = [float(element) for element in string_elements]
+            else:
+                message.content = []
 
         return message
 
     def process_msg(self, message):
     #todo(ALANA): process decoded message
         if message.performative == 'inform' and type(message.content) == list:
-            utility_values = np.array([self.model.p.consumer_utility_function(company, self, self.information_level) for company in self.model.companies])
-            self.__pref_company_id = None
-            self.agent_method(utility_values)  # Decide qual empresa oferece a maior utilidade esperada
-            best_company_id = self.pref_company_id()
-            if best_company_id is not None:
-                best_company = self.model.companies[best_company_id]
-                
-                response = KQMLMessage('accept', self, self.model.coordinator.message_handler.name[0], 'buy')
-                self.message_handler.send_message(self.model.coordinator.message_handler, response)
-                self.__buy = True
+            if(message.content!= []):
+                utility_values = np.array([self.model.p.consumer_utility_function(company, self, self.information_level) for company in self.model.companies])
+                self.__pref_company_id = None
+                self.agent_method(utility_values)  # Decide qual empresa oferece a maior utilidade esperada
+                best_company_id = self.pref_company_id()
+                if best_company_id is not None:
+                    best_company = self.model.companies[best_company_id]
+
+                    response = KQMLMessage('accept', self, self.model.coordinator.message_handler.name[0], 'buy')
+                    self.message_handler.send_message(self.model.coordinator.message_handler, response)
+                    self.__buy = True
+                else:
+                    response = KQMLMessage('reject', self, self.model.coordinator.message_handler.name[0], 'leave')
+                    self.message_handler.send_message(self.model.coordinator.message_handler, response)
+                    print(f"Consumer {self.id} is leaving the market.")
+                    self.__buy = False
             else:
+                self.leave_market()
                 response = KQMLMessage('reject', self, self.model.coordinator.message_handler.name[0], 'leave')
                 self.message_handler.send_message(self.model.coordinator.message_handler, response)
                 print(f"Consumer {self.id} is leaving the market.")
