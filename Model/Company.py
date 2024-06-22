@@ -2,7 +2,6 @@ import agentpy as ap
 import numpy as np
 import asyncio
 import traceback
-from Model.utility import utility_function
 from Model.KQML_message import MessageHandler, KQMLMessage
 
 
@@ -12,8 +11,10 @@ class Company(ap.Agent):
         self.__epsilon = self.p.epsilon
         self.__position = np.random.rand(1, 2) * 100
         self.__cash = self.p.companies_cash[self.id - self.p.n_consumer_agents - 1]
-        self.__prices = self.p.initial_prices[self.id - self.p.n_consumer_agents - 1]
+        self.__price = self.p.initial_prices[self.id - self.p.n_consumer_agents - 1]
+        self.__prices = self.p.initial_prices
         self.__strategy = 'random'  # estratégia (acho que seria melhor diferentes estratégias serem aleatoriamente distribuídas ao invés de determinar uma estratégia aleatória para uma única empresa, mas de início pode ser uma única estratégia mais simples possível e depois discutimos)
+        self.__operational_cost = self.p.operational_cost
         self.information_level = np.random.uniform(0.5, 1.0)  # nível de informação da empresa
         self.__name = "Company" + str(self.id)
         self.message_handler = MessageHandler(self.__name, verbose=self.p.verbose)
@@ -27,33 +28,24 @@ class Company(ap.Agent):
         return self.__position
 
     def price(self):
-        return self.__prices
+        return self.__price
 
     def cash(self):
         return self.__cash
+    
+    def get_prices_info(self, prices):
+        self.__prices = prices
 
     def evaluate_change_in_price(self):
         # decisão da empresa sobre os preços
-        best_price = self.__prices
-        best_profit = self.calculate_profit(self.__prices)
-
-        for i in [-self.__epsilon, 0, self.__epsilon]:
-            new_price = self.__prices + i
-            new_profit = self.calculate_profit(new_price)
-            if new_profit > best_profit:
-                best_profit = new_profit
-                best_price = new_price
+        if(self.__price >= np.mean(self.__prices)):
+            self.__price -= self.__epsilon
         
-        self.__prices = best_price
-
-    def calculate_profit(self, price):
-        # lucro com base no preço
-        total_utility = 0
-        for consumer in self.model.consumers:
-            utility = utility_function(self, consumer, self.information_level)
-            if utility > 0:
-                total_utility += utility
-        return total_utility - price
+    def sell(self, n_sellings):
+        self.__cash += self.calculate_profit(n_sellings*self.__price)
+    
+    def calculate_profit(self, earnings):
+        return earnings - self.__operational_cost
 
     def record(self, variable, value):
         if not hasattr(self, '_records'):
@@ -71,7 +63,7 @@ class Company(ap.Agent):
         while self.message_handler.running:
             try:
                 message = self.message_handler.receive_message(timeout=1)
-                if message:
+                if message and message.receiver[:-1] == 'Company':
                     print(f'Company {self.id} received message: {message.to_string()}')
 
                     if message.performative == 'request' and message.content == 'send_price':
@@ -82,9 +74,9 @@ class Company(ap.Agent):
                     print(f'Company {self.id} did not receive any message.')
 
             except Exception as e:
-                print(f"Error handling message in Company {self.id}: {str(e)}")
-                import traceback
-                print(traceback.format_exc())
+                #print(f"Error handling message in Company {self.id}: {str(e)}")
+                #import traceback
+                #print(traceback.format_exc())
                 continue
             
     def decode_msg(self, message):

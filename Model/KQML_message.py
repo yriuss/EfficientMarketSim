@@ -47,7 +47,7 @@ class MessageHandler:
     def run(self):
         while self.running:
             try:
-                message = self.receive_message(timeout = 1)
+                message = self.receive_message(timeout = 10)
                 self.process_message(message)
             except queue.Empty:
                 continue

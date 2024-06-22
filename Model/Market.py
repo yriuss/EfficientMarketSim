@@ -47,13 +47,6 @@ class Market(ap.Model):
     def step(self):
         self.coordinator.process()
 
-        for company in self.companies:
-            company.evaluate_change_in_price()
-        
-        for consumer in self.consumers:
-            utility_values = np.array([self.p.utility_function(company, consumer, consumer.information_level) for company in self.companies])
-            consumer.agent_method(utility_values)
-
     def update(self):
         """ Atualiza variáveis dinâmicas. """
         for company in self.companies:

@@ -11,12 +11,19 @@ class Coordinator(ap.Agent):
         self.message_handler = MessageHandler(self.__name, verbose=self.p.verbose)
         self.tasks = []
         self.all_received = False
+        self.__offers = []
     
     def check_reception(self):
         return self.all_received
 
     def register_company(self, company):
         self.__companies.append(company)
+    
+    def remove_company(self, idx):
+        del self.__companies[idx]
+    
+    def remove_consumer(self, idx):
+        del self.__consumers[idx]
 
     def register_consumer(self, consumer):
         self.__consumers.append(consumer)
@@ -44,7 +51,8 @@ class Coordinator(ap.Agent):
     def process(self):
         #todo: essas mensagens são bem genéricas, os valores aqui precisam ser decodificados
         self.send_msgs2group('request', self.__companies, 'send_price')
-        self.send_msgs2group('inform', self.__consumers, 'offers_available')
+        self.send_msgs2group('inform', self.__consumers, 'offers:'+str(self.__offers))
+        self.__offers = []
         #todo: falta uma última etapa de mensagens do Coordenador para as empresas
 
     
@@ -55,22 +63,34 @@ class Coordinator(ap.Agent):
         for consumer in self.__consumers:
             consumer.message_handler.stop()
 
+        
+
     def run(self):
         while self.message_handler.running:
-            message = self.message_handler.receive_message(timeout= 1)
-            if message.performative == 'request':
-                self.received_counter -=  1
-            elif message.performative == 'accept':
-                self.received_counter -= 1
-            elif message.performative == 'inform':
-                self.received_counter -= 1
-            if(self.received_counter == 0):
-                self.message_handler.running = False
+            try:
+                message = self.message_handler.receive_message(timeout= 1)
+                message = self.decode_messages(message)
+            except Exception as e:
+                continue
         self.message_handler.running = True
     
-    def decode_messages(self):
-        #todo: decode messages
-        pass
+
+
+
+    def decode_messages(self, message):
+        if message.performative == 'request':
+            self.received_counter -=  1
+        elif message.performative == 'accept':
+            self.received_counter -= 1
+        elif message.performative == 'inform':
+            self.received_counter -= 1
+
+            if message.sender.name()[:-1] == "Company":
+                self.__offers.append(float(message.content.split(':')[1]))
+        if(self.received_counter == 0):
+            self.message_handler.running = False
+        
+        return message
 
     def process_message(self):
         #todo: after decoding, process each message
