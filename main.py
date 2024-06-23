@@ -17,8 +17,6 @@ def main():
     np.random.seed(42)
 
 
-
-
     INITIAL_SPREAD = 500
     INITIAL_RESERVE = 10000
     INITIAL_OPERATIONAL_COST = 5
@@ -52,7 +50,8 @@ def main():
         'steps': 300,
         'verbose': False,
         'all_values': initial_values,
-        'traveling_cost': 0.1
+        'traveling_cost': 0.1,
+        'plot': False
     }
 
     model = Market(parameters)

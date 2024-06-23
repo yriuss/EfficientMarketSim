@@ -21,7 +21,8 @@ class Market(ap.Model):
 
         self.coordinator.start_process()
         self.fig, self.ax = plt.subplots(figsize=(10, 8))  # Inicializa a figura e os eixos
-        self.show_env()
+        if(self.p.plot):
+            self.show_env()
         
     def show_env(self):
         self.ax.clear()  # Limpa os eixos
@@ -54,7 +55,8 @@ class Market(ap.Model):
 
     def step(self):
         self.coordinator.process()
-        self.show_env()
+        if(self.p.plot):
+            self.show_env()
     
     def update_env(self):
 
