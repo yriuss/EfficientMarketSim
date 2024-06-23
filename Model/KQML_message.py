@@ -2,7 +2,6 @@ import threading
 import queue
 import time 
 
-VERBOSE = True
 
 class KQMLMessage:
     def __init__(self, performative, sender, receiver, content):

@@ -20,10 +20,44 @@ class Market(ap.Model):
             self.coordinator.register_company(company)
 
         self.coordinator.start_process()
-
+        self.fig, self.ax = plt.subplots(figsize=(10, 8))  # Inicializa a figura e os eixos
         self.show_env()
         
     def show_env(self):
+        self.ax.clear()  # Limpa os eixos
+
+        companies_positions = np.empty((0, 2))
+        consumer_positions = np.empty((0, 2))
+        
+        for company in self.companies:
+            companies_positions = np.vstack((companies_positions, company.position()))
+
+        for consumer in self.coordinator.consumers()[0]:
+            consumer_positions = np.vstack((consumer_positions, consumer.position()))
+
+        for i, (x, y) in enumerate(companies_positions):
+            cor = 'green' if self.companies[i].cash() >= 0 else 'red'
+            self.ax.text(x, y, f'Cash: ${self.companies[i].cash():.2f}', fontsize=9, ha='center', va='center',
+                         bbox=dict(facecolor=cor, alpha=0.3, boxstyle='round,pad=0.3'))
+
+        self.ax.scatter(companies_positions[:, 0], companies_positions[:, 1], color='red', marker='*', s=200, label='Empresas')
+        self.ax.scatter(consumer_positions[:, 0], consumer_positions[:, 1], color='blue', marker='o', s=100, label='Consumidores')
+
+        self.ax.set_title('Initial Market Space')
+        self.ax.set_xlabel('X Coordinates')
+        self.ax.set_ylabel('Y Coordinates')
+        self.ax.legend()
+        self.ax.grid(True)
+        
+        plt.draw()  # Atualiza o gráfico
+        plt.pause(0.1)  # Pausa para que o gráfico seja atualizado
+
+    def step(self):
+        self.coordinator.process()
+        self.show_env()
+    
+    def update_env(self):
+
         plt.figure(figsize=(10, 8))
         companies_positions = np.empty((0, 2))
         consumer_positions = np.empty((0, 2))
@@ -37,20 +71,18 @@ class Market(ap.Model):
             cor = 'green' if self.p.companies_cash[i] >= 0 else 'red'
             plt.text(x, y, f'Cash: ${self.p.companies_cash[i]:.2f}', fontsize=9, ha='center', va='center',
                      bbox=dict(facecolor=cor, alpha=0.3, boxstyle='round,pad=0.3'))
-
+        
         plt.scatter(companies_positions[:, 0], companies_positions[:, 1], color='red', marker='*', s=200, label='Empresas')
         plt.scatter(consumer_positions[:, 0], consumer_positions[:, 1], color='blue', marker='o', s=100, label='Consumidores')
 
-        plt.title('Initial Market Space')
-        plt.xlabel('X Coordinates')
-        plt.ylabel('Y Coordinates')
-        plt.legend()
-        plt.grid(True)
-        plt.show()
+        plt.draw()
+        plt.pause(0.1)
 
-    def step(self):
-        self.coordinator.process()
+
         
+
+
+
 
     def update(self):
         """ Atualiza variáveis dinâmicas. """

@@ -14,6 +14,9 @@ class Coordinator(ap.Agent):
         self.all_received = False
         self.__offers = []
     
+    def consumers(self):
+        return self.__consumers
+
     def check_reception(self):
         return self.all_received
 
