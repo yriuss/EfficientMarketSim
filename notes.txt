@@ -5,3 +5,22 @@ Teoria dos jogos:
 - Os agentes, neste caso, baseiam-se nas suas respostas e nas respostas de outros agentes para determinar a melhro ação a ser tomada. 
 
 - Se todos agentes tem a melhro resposta, o chamado equilíbro de Nash é atingido. Este equilíbrio é o conceito central da maioria das aplicações de teoria dos jogos, incluingo o "Hotelling's model".
+
+
+
+máx = 17 minutos
+
+16
+
+Lindalva e e Diego (~8 min):
+- introdução conceitual
+- organização
+- coordenação
+- negociação
+- comunicação
+- funções de utilidade
+
+Adriel e Alana (~8 min):
+- estrategias de mercado
+- assimetria de informação
+- olig e monopolios
