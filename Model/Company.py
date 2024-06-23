@@ -9,17 +9,41 @@ class Company(ap.Agent):
 
     def setup(self):
         self.__epsilon = self.p.epsilon
-        self.__position = np.random.rand(1, 2) * 100
+        self.__position = self.p.coordinates[self.id -1 ,:]
         self.__cash = self.p.companies_cash[self.id - self.p.n_consumer_agents - 1]
         self.__price = self.p.initial_prices[self.id - self.p.n_consumer_agents - 1]
         self.__prices = self.p.initial_prices
-        self.__strategy = 'random'  # estratégia (acho que seria melhor diferentes estratégias serem aleatoriamente distribuídas ao invés de determinar uma estratégia aleatória para uma única empresa, mas de início pode ser uma única estratégia mais simples possível e depois discutimos)
+        self.__strategy = self.model.p.strategies[self.id - self.p.n_consumer_agents - 1]
         self.__operational_cost = self.p.operational_cost
         self.information_level = np.random.uniform(0.5, 1.0)  # nível de informação da empresa
         self.__name = "Company" + str(self.id)
+        self.__max_spread_thresh = self.model.p.initial_spreads[self.id - self.p.n_consumer_agents - 1]
         self.message_handler = MessageHandler(self.__name, verbose=self.p.verbose)
-        
+        self.__product_value = self.model.p.all_values[self.id - self.p.n_consumer_agents - 1]
         self._inbox = asyncio.Queue()
+    
+    def max_spread_thresh(self):
+        return self.__max_spread_thresh
+
+    def product_value(self):
+        return self.__product_value
+
+    def strategy(self):
+        return self.__strategy
+
+    def strategy1(self):
+        if(self.__price > np.mean(self.__prices)):
+            self.__price -= self.__epsilon
+    
+    def strategy2(self):
+        if(self.__cash > 0):
+            self.__max_spread_thresh += self.__epsilon
+            self.__cash -= self.p.spread_cost
+    
+    def strategy3(self):
+        if(self.__price > self.__operational_cost):
+            self.__product_value += self.__epsilon
+            self.__operational_cost += self.__epsilon
 
     def name(self):
         return self.__name
@@ -36,10 +60,14 @@ class Company(ap.Agent):
     def get_prices_info(self, prices):
         self.__prices = prices
 
-    def evaluate_change_in_price(self):
+    def define_strategy(self):
         # decisão da empresa sobre os preços
-        if(self.__price > np.mean(self.__prices)):
-            self.__price -= self.__epsilon
+        if(self.__strategy == 1):
+            self.strategy1()
+        elif(self.__strategy == 2):
+            self.strategy2()
+        elif(self.__strategy == 3):
+            self.strategy3()
         
     def sell(self, n_sellings):
         self.__cash += self.calculate_profit(n_sellings*self.__price)
@@ -64,7 +92,8 @@ class Company(ap.Agent):
             try:
                 message = self.message_handler.receive_message(timeout=1)
                 if message and 'Company' in message.receiver:
-                    print(f'Company {self.id} received message: {message.to_string()}')
+                    if(self.p.verbose):
+                        print(f'Company {self.id} received message: {message.to_string()}')
 
                     if message.performative == 'request' and message.content == 'send_price':
                         self.decode_msg(message)

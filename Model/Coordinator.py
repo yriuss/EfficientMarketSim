@@ -2,6 +2,7 @@ import asyncio
 import agentpy as ap
 from .KQML_message import KQMLMessage
 from .KQML_message import *
+import numpy as np
 
 class Coordinator(ap.Agent):
     def setup(self):
@@ -52,12 +53,19 @@ class Coordinator(ap.Agent):
         #todo: essas mensagens são bem genéricas, os valores aqui precisam ser decodificados
         if(self.__companies != []):
             self.send_msgs2group('request', self.__companies, 'send_price')
-        if(self.__consumers != []):
-            self.send_msgs2group('inform', self.__consumers, 'offers:'+str(self.__offers))
+
+        
+        for consumer in self.__consumers:
+            offers = []
+            for i, company in enumerate(self.__companies):
+                if(np.linalg.norm(company.position() - consumer.position()) <= company.max_spread_thresh()):
+                    offers.append(self.__offers[i])
+            self.send_msgs2group('inform', [consumer], 'offers:'+str(offers))
+        
         for i, company in enumerate(self.__companies):
             consumers_that_bought = 0
             for consumer in self.__consumers:
-                if(consumer.bought()):
+                if(consumer.bought(company.name())):
                     consumers_that_bought += 1
             company.sell(consumers_that_bought)
 
@@ -67,7 +75,7 @@ class Coordinator(ap.Agent):
                 del self.__companies[i]
             else:
                 company.get_prices_info(self.__offers)
-                company.evaluate_change_in_price()
+                company.define_strategy()
 
         self.__offers = []
         #todo: falta uma última etapa de mensagens do Coordenador para as empresas

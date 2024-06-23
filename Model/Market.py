@@ -9,7 +9,7 @@ class Market(ap.Model):
 
     def setup(self):
         """ Inicializa uma lista de novos agentes. """
-        self.consumers = ap.AgentList(self, self.p.n_consumer_agents, Consumer, positions=self.p.consumer_positions)
+        self.consumers = ap.AgentList(self, self.p.n_consumer_agents, Consumer)
         self.companies = ap.AgentList(self, self.p.n_company_agents, Company)
         self.coordinator = ap.AgentList(self, 1, Coordinator)
 
@@ -26,8 +26,12 @@ class Market(ap.Model):
     def show_env(self):
         plt.figure(figsize=(10, 8))
         companies_positions = np.empty((0, 2))
+        consumer_positions = np.empty((0, 2))
         for company in self.companies:
             companies_positions = np.vstack((companies_positions, company.position()))
+
+        for consumer in self.consumers:
+            consumer_positions = np.vstack((consumer_positions, consumer.position()))
 
         for i, (x, y) in enumerate(companies_positions):
             cor = 'green' if self.p.companies_cash[i] >= 0 else 'red'
@@ -35,7 +39,7 @@ class Market(ap.Model):
                      bbox=dict(facecolor=cor, alpha=0.3, boxstyle='round,pad=0.3'))
 
         plt.scatter(companies_positions[:, 0], companies_positions[:, 1], color='red', marker='*', s=200, label='Empresas')
-        plt.scatter(self.p.consumer_positions[:, 0], self.p.consumer_positions[:, 1], color='blue', marker='o', s=100, label='Consumidores')
+        plt.scatter(consumer_positions[:, 0], consumer_positions[:, 1], color='blue', marker='o', s=100, label='Consumidores')
 
         plt.title('Initial Market Space')
         plt.xlabel('X Coordinates')

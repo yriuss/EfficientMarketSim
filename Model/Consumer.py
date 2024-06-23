@@ -5,27 +5,29 @@ from Model.KQML_message import MessageHandler, KQMLMessage
 
 class Consumer(ap.Agent):
 
-    def setup(self, positions):
-        self.__position = positions[self.id - 1, :]
+    def setup(self):
+        self.__position = self.p.coordinates[self.id - 1,:]
         self.__leaved = False
         self.information_level = np.random.uniform(0.5, 1.0)  # nível de informação do consumidor
         self.__name = "Consumer" + str(self.id)
         self.message_handler = MessageHandler(self.__name, verbose=False)
         
         self._inbox = asyncio.Queue()
-        self.__value = self.model.p.value
+        
         self.__traveling_cost = self.model.p.traveling_cost
         self.__buy = False
         self.__pref_company_index = None
-    def bought(self):
-        if(self.__buy):
+        self.__bought_from = None
+
+    def bought(self, company):
+        if(self.__buy and company == self.__bought_from):
+            self.__bought_from = None
             self.__buy = False
             return True
         else:
-            return self.__buy
+            return False
 
-    def value(self):
-        return self.__value
+    
     def traveling_cost(self):
         return self.__traveling_cost
     def name(self):
@@ -89,16 +91,17 @@ class Consumer(ap.Agent):
                     response = KQMLMessage('accept', self, self.model.coordinator.message_handler.name[0], 'buy')
                     self.message_handler.send_message(self.model.coordinator.message_handler, response)
                     self.__buy = True
+                    self.__bought_from = best_company.name()
                 else:
                     response = KQMLMessage('reject', self, self.model.coordinator.message_handler.name[0], 'leave')
                     self.message_handler.send_message(self.model.coordinator.message_handler, response)
                     print(f"Consumer {self.id} is leaving the market.")
                     self.__buy = False
             else:
-                self.leave_market()
-                response = KQMLMessage('reject', self, self.model.coordinator.message_handler.name[0], 'leave')
+                #self.leave_market()
+                response = KQMLMessage('reject', self, self.model.coordinator.message_handler.name[0], 'wait')
                 self.message_handler.send_message(self.model.coordinator.message_handler, response)
-                print(f"Consumer {self.id} is leaving the market.")
+                #print(f"Consumer {self.id} is leaving the market.")
                 self.__buy = False
     
 
