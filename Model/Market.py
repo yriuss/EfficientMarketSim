@@ -4,6 +4,13 @@ from Model.Consumer import Consumer
 from Model.Company import Company
 from Model.Coordinator import Coordinator
 import numpy as np
+import csv
+
+def save_dict_to_csv(filename, data):
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        for key, value in data.items():
+            writer.writerow([key, value])
 
 class Market(ap.Model):
 
@@ -104,9 +111,31 @@ class Market(ap.Model):
         """ Mostra os resultados da simulação. """
         fig, axs = plt.subplots(2, 2, figsize=(10, 12))  # Cria uma figura com 2 subplots (1 coluna, 2 linhas)
 
-        for company in self.companies:
+        companies_strategy1 = 0
+        companies_strategy2 = 0
+        companies_strategy3 = 0
+
+        begin_companies_strategy1 = 0
+        begin_companies_strategy2 = 0
+        begin_companies_strategy3 = 0
+
+        for i, company in enumerate(self.companies):
             axs[0, 0].plot(company.recorded('cash'), label=f'Empresa {company.id} - Caixa')
             axs[0, 1].plot(company.recorded('price'), label=f'Empresa {company.id} - Preço')
+
+            if company.strategy() == 1:
+                companies_strategy1 += 1
+            elif company.strategy() == 2:
+                companies_strategy2 += 1
+            elif company.strategy() == 3:
+                companies_strategy3 += 1
+            
+            if self.p.strategies[i] == 1:
+                begin_companies_strategy1 += 1
+            elif self.p.strategies[i] == 2:
+                begin_companies_strategy2 += 1
+            elif self.p.strategies[i] == 3:
+                begin_companies_strategy3 += 1
         
         axs[1, 0].plot(self.coordinator[0].recorded('number_companies'))
         axs[1, 1].plot(self.coordinator[0].recorded('number_consumers'))
@@ -138,12 +167,22 @@ class Market(ap.Model):
         plt.tight_layout()  # Ajusta a disposição dos subplots para evitar sobreposição
         plt.show()
 
-        #data = {
-        #    'Número de empresas utilizando a estratégia 1':,
-        #    'Número de empresas utilizando a estratégia 2':,
-        #    'Número de empresas utilizando a estratégia 3':,
-        #    'Número de empresas':,
-        #    'Número de consumidores':
-#
-        #}
-#
+        
+
+        data = {
+            'Número de empresas utilizando a estratégia 1 (final)':companies_strategy1,
+            'Número de empresas utilizando a estratégia 2 (final)':companies_strategy2,
+            'Número de empresas utilizando a estratégia 3 (final)':companies_strategy3,
+            'Número de empresas utilizando a estratégia 1 (começo)':begin_companies_strategy1,
+            'Número de empresas utilizando a estratégia 2 (começo)':begin_companies_strategy2,
+            'Número de empresas utilizando a estratégia 3 (começo)':begin_companies_strategy3,
+            'Número de empresas (final)': self.coordinator[0].recorded('number_companies')[-1],
+            'Número de consumidores (final)': self.coordinator[0].recorded('number_consumers')[-1]
+
+        }
+
+        headers = list(data.keys())
+        values = np.array(list(data.values()))
+        save_dict_to_csv("results_file.csv", data)
+
+
