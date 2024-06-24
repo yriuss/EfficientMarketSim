@@ -17,10 +17,10 @@ def main():
     np.random.seed(42)
 
 
-    INITIAL_SPREAD = 20
+    INITIAL_SPREAD = 500
     INITIAL_RESERVE = 10000
-    INITIAL_OPERATIONAL_COST = 0
-    INITIAL_PRICE = 20
+    INITIAL_OPERATIONAL_COST = 5
+    INITIAL_PRICE = 10
     N_CONSUMERS = 100
     N_COMPANIES = 10  # modelo de Hotelling, geralmente 2 empresas
 
@@ -33,7 +33,7 @@ def main():
     #strategies = 3*np.ones((N_COMPANIES))
 
     #informação
-    strategies = 2*np.ones((N_COMPANIES))
+    #strategies = 2*np.ones((N_COMPANIES))
 
     coordinates = np.random.uniform(-1000, 1000, size=(N_COMPANIES + N_CONSUMERS, 2))
 
@@ -41,7 +41,7 @@ def main():
     companies_cash = abs(np.random.normal(INITIAL_RESERVE, std_dev, N_COMPANIES))
     initial_prices = abs(np.random.normal(INITIAL_PRICE, std_dev, N_COMPANIES))
     initial_spreads = abs(np.random.normal(INITIAL_SPREAD, std_dev, N_COMPANIES))
-    initial_values = 200*np.ones(N_COMPANIES)
+    initial_values = 100*np.ones(N_COMPANIES)
 
 
 
@@ -58,7 +58,7 @@ def main():
     #initial_values[0:5] = 100*initial_values[1]
 
     #monopolio informação
-    initial_spreads[1] = 100*initial_spreads[1]
+    #initial_spreads[1] = 100*initial_spreads[1]
 
     #oligopolio informação
     #initial_spreads[0:2] = 100*initial_spreads[1]
@@ -75,10 +75,10 @@ def main():
         'initial_spreads': initial_spreads,
         'initial_prices': initial_prices,
         'strategies': strategies,
-        'spread_cost': 1000,
+        'spread_cost': 10,
         'consumer_utility_function': consumer_utility_function,
         'operational_cost': INITIAL_OPERATIONAL_COST,
-        'epsilon': 0.1,
+        'epsilon': 0.0001,
         'steps': 300,
         'verbose': False,
         'all_values': initial_values,

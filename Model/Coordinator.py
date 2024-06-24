@@ -75,7 +75,7 @@ class Coordinator(ap.Agent):
     def process(self):
         #todo: essas mensagens são bem genéricas, os valores aqui precisam ser decodificados
         if(self.__companies != []):
-            self.send_msgs2group('request', self.__companies, 'send_price')
+            self.send_msgs2group('request', self.__companies, 'send_price') # - > request inform propose accept-propose reject-propose
 
         
         for consumer in self.__consumers:
