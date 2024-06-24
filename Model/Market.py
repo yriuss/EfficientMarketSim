@@ -20,8 +20,8 @@ class Market(ap.Model):
             self.coordinator.register_company(company)
 
         self.coordinator.start_process()
-        self.fig, self.ax = plt.subplots(figsize=(10, 8))  # Inicializa a figura e os eixos
         if(self.p.plot):
+            self.fig, self.ax = plt.subplots(figsize=(10, 8))  # Inicializa a figura e os eixos
             self.show_env()
         
     def show_env(self):
@@ -92,6 +92,9 @@ class Market(ap.Model):
             company.record('cash', company.cash())
             company.record('price', company.price())
         
+        self.coordinator[0].record('number_companies', self.coordinator[0].number_companies())
+        self.coordinator[0].record('number_consumers', self.coordinator[0].number_consumers())
+        
     def end(self):
         """ Registra uma medida de avaliação. """
         self.coordinator.end()
@@ -99,13 +102,48 @@ class Market(ap.Model):
     
     def show_results(self):
         """ Mostra os resultados da simulação. """
-        plt.figure(figsize=(10, 8))
+        fig, axs = plt.subplots(2, 2, figsize=(10, 12))  # Cria uma figura com 2 subplots (1 coluna, 2 linhas)
+
         for company in self.companies:
-            plt.plot(company.recorded('cash'), label=f'Empresa {company.id} - Caixa')
-            plt.plot(company.recorded('price'), label=f'Empresa {company.id} - Preço')
-        plt.title('Resultados da Simulação de Mercado')
-        plt.xlabel('Passos')
-        plt.ylabel('Valores')
-        plt.legend()
-        plt.grid(True)
+            axs[0, 0].plot(company.recorded('cash'), label=f'Empresa {company.id} - Caixa')
+            axs[0, 1].plot(company.recorded('price'), label=f'Empresa {company.id} - Preço')
+        
+        axs[1, 0].plot(self.coordinator[0].recorded('number_companies'))
+        axs[1, 1].plot(self.coordinator[0].recorded('number_consumers'))
+
+        # Configuração do primeiro subplot (Caixa)
+        axs[0, 0].set_title('Caixa das Empresas')
+        axs[0, 0].set_xlabel('Passos')
+        axs[0, 0].set_ylabel('Caixa')
+        axs[0, 0].legend()
+        axs[0, 0].grid(True)
+
+        # Configuração do segundo subplot (Preço)
+        axs[0, 1].set_title('Preço das Empresas')
+        axs[0, 1].set_xlabel('Passos')
+        axs[0, 1].set_ylabel('Preço')
+        axs[0, 1].legend()
+        axs[0, 1].grid(True)
+
+        axs[1, 0].set_title('Número de Empresas')
+        axs[1, 0].set_xlabel('N')
+        axs[1, 0].set_ylabel('Passos')
+        axs[1, 0].grid(True)
+
+        axs[1, 1].set_title('Número de Consumidores')
+        axs[1, 1].set_xlabel('N')
+        axs[1, 1].set_ylabel('Passos')
+        axs[1, 1].grid(True)
+
+        plt.tight_layout()  # Ajusta a disposição dos subplots para evitar sobreposição
         plt.show()
+
+        #data = {
+        #    'Número de empresas utilizando a estratégia 1':,
+        #    'Número de empresas utilizando a estratégia 2':,
+        #    'Número de empresas utilizando a estratégia 3':,
+        #    'Número de empresas':,
+        #    'Número de consumidores':
+#
+        #}
+#

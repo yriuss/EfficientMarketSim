@@ -14,6 +14,26 @@ class Coordinator(ap.Agent):
         self.all_received = False
         self.__offers = []
     
+    def record(self, variable, value):
+        if not hasattr(self, '_records'):
+            self._records = {}
+        if variable not in self._records:
+            self._records[variable] = []
+        self._records[variable].append(value)
+
+    def recorded(self, variable):
+        if hasattr(self, '_records') and variable in self._records:
+            return self._records[variable]
+        return []
+
+    def number_companies(self) -> int:
+        n_companies = len(self.__companies)
+        return n_companies
+    
+    def number_consumers(self) -> int:
+        n_consumers = len(self.__consumers)
+        return n_consumers
+
     def consumers(self):
         return self.__consumers
 

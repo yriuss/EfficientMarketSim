@@ -21,6 +21,7 @@ Lindalva e e Diego (~8 min):
 - funções de utilidade
 
 Adriel e Alana (~8 min):
+- explicar código de uma forma geral
 - estrategias de mercado
 - assimetria de informação
 - olig e monopolios
