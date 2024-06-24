@@ -183,6 +183,6 @@ class Market(ap.Model):
 
         headers = list(data.keys())
         values = np.array(list(data.values()))
-        save_dict_to_csv("results_file.csv", data)
+        save_dict_to_csv("results/results_file.csv", data)
 
 

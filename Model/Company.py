@@ -32,11 +32,15 @@ class Company(ap.Agent):
         return self.__strategy
 
     def strategy1(self):
-        if(self.__price > np.mean(self.__prices)):
+        if(self.__price > np.mean(self.__prices) or self.__cash > 100000 and self.__price > 0):
             self.__price -= self.__epsilon
+        if(self.__price < 0):
+            self.__price = 0
+        if(len(self.__prices) <= 3):
+            self.__price = abs(self.p.initial_prices[0]*2)
     
     def strategy2(self):
-        if(self.__cash > 0):
+        if(self.__cash > 0 and self.__max_spread_thresh < 1000): # 1000 é a dimensão do mapa, todas as empresas tem esta informação
             self.__max_spread_thresh += self.__epsilon
             self.__cash -= self.p.spread_cost
     
